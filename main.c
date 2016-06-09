@@ -18,8 +18,8 @@ int main(void) {
 
     initScheduler();
 
-    addTask(Task1, INTERVAL_100ms, 0);
-    addTask(Task2, INTERVAL_1000ms, 0);
+    addTask(Task1, INTERVAL_100ms);
+    addTask(Task2, INTERVAL_1000ms);
 
 	runScheduler();
 

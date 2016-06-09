@@ -9,7 +9,7 @@
 #define SCHEDULER_H_
 
 // PUBLIC API
-void addTask(void (*f)(), int interval, int priority);
+void addTask(void (*f)(), int interval);
 void runScheduler();
 void initScheduler();
 

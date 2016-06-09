@@ -14,10 +14,9 @@ static TaskDescriptor tasks[MAX_TASKS];
 static unsigned int num_tasks;
 static unsigned long ticks;
 
-void addTask(void (*routine)(), int interval, int priority) {
+void addTask(void (*routine)(), int interval) {
 	if(num_tasks < MAX_TASKS) {
 		TaskDescriptor new_task = {
-				.priority = priority,
 				.interval = interval,
 				.routine  = routine,
 				.last_tick = 0

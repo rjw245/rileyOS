@@ -16,7 +16,6 @@
 #define INTERVAL_1000ms		1000/SCHEDULER_TICK_MS
 
 typedef struct {
-	unsigned int priority;  // Lower number = higher priority
 	int interval;
 	int last_tick;
 	void (*routine) (void);

@@ -24,11 +24,15 @@ int main(void) {
 }
 
 void Task1() {
-	//Flash LED P1.0
-	P1OUT ^= 0x01;
+	while(1) {
+		//Flash LED P1.0
+		P1OUT ^= 0x01;
+	}
 }
 
 void Task2() {
-	//Flash LED P4.0
-	P4OUT ^= 0x01;
+	while(1) {
+		//Flash LED P4.0
+		P4OUT ^= 0x01;
+	}
 }

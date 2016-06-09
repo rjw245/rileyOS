@@ -4,11 +4,8 @@
 #include "task.h"
 #include "scheduler.h"
 
-
 void Task1();
 void Task2();
-
-
 
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer

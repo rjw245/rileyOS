@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <msp430.h>
+#include "rileyOS_config.h"
 
 /*
  * hello.c
@@ -7,12 +8,12 @@
 
 static volatile int printNow=0;
 
-static void setupTimerA();
+static void setupSchedulerTick();
 
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
-    setupTimerA();
+    setupSchedulerTick();
     P1DIR |= 0x01;
 	
 	while(1) {
@@ -25,17 +26,17 @@ int main(void) {
 	return 0;
 }
 
-static void setupTimerA() {
+static void setupSchedulerTick() {
 	TA0CTL |= MC_0; //Stop timer A during setup
-	TA0CCR0 = 10000;
+	TA0CCR0 = 32*SCHEDULER_TICK_MS; //Assume ACLK=32kHz
 
 	/*
-	 * Clock source: SMCLK
+	 * Clock source: ACLK
 	 * Mode: Count up to CCR repeatedly (and start)
 	 * Divisor: 1
 	 * and clear the clock
 	 */
-	TA0CTL =  TASSEL__SMCLK | MC__UP | ID__8 | TACLR;
+	TA0CTL =  TASSEL__ACLK|MC__UP|ID__1|TACLR;
 	TA0CCTL0 = CCIE; //Enable interrupt for CCR0
 	__enable_interrupt();
 }

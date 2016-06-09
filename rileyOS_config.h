@@ -8,7 +8,7 @@
 #ifndef RILEYOS_CONFIG_H_
 #define RILEYOS_CONFIG_H_
 
-#define SCHEDULER_TICK_MS	100  // Scheduler tick period in milliseconds
+#define SCHEDULER_TICK_MS	1  // Scheduler tick period in milliseconds
 #define MAX_TASKS			10
 
 

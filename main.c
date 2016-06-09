@@ -13,10 +13,13 @@ void Task2();
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
+    P1DIR |= 0x01;
+    P4DIR |= 0x01;
+
     initScheduler();
 
-    addTask(Task1, 1, 0);
-    addTask(Task2, 10, 0);
+    addTask(Task1, INTERVAL_100ms, 0);
+    addTask(Task2, INTERVAL_1000ms, 0);
 
 	runScheduler();
 
@@ -24,9 +27,9 @@ int main(void) {
 }
 
 void Task1() {
-	printf("Task 1 here\r\n");
+	P1OUT ^= 0x01;
 }
 
 void Task2() {
-	printf("Task 2 here\r\n");
+	P4OUT ^= 0x01;
 }

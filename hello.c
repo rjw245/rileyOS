@@ -36,7 +36,7 @@ static void setupTimerA() {
 	 * and clear the clock
 	 */
 	TA0CTL =  TASSEL__SMCLK | MC__UP | ID__8 | TACLR;
-	TA0CCTL0 = CCIE;
+	TA0CCTL0 = CCIE; //Enable interrupt for CCR0
 	__enable_interrupt();
 }
 

@@ -9,25 +9,44 @@
 #include "rileyOS_config.h"
 #include "scheduler.h"
 #include <msp430.h>
+#include <stdlib.h>
+#include <stdint.h>
 
 static TaskDescriptor tasks[MAX_TASKS];
 static unsigned int num_tasks;
 static unsigned long ticks;
 
-void addTask(void (*routine)(), int interval) {
+volatile void * taskSP;
+
+void addTask(void (*routine)(), int interval, unsigned int stack_len) {
 	if(num_tasks < MAX_TASKS) {
 		TaskDescriptor new_task = {
 				.interval = interval,
 				.routine  = routine,
-				.last_tick = 0
+				.last_tick = 0,
+				.task_sp = malloc(stack_len),
+				.ready   = 0
 		};
+		new_task.task_sp = (char*)new_task.task_sp + stack_len;
+
 		tasks[num_tasks] = new_task;
+
+		//Push task routine pointer onto stack, to be popped off later as the PC
+		tasks[num_tasks].task_sp = (char*)tasks[num_tasks].task_sp - 2;
+		*((TaskRoutine*)tasks[num_tasks].task_sp) = tasks[num_tasks].routine; //Initial PC value
+
+		//Push a 0 onto the stack, to be popped off later as the status register
+		tasks[num_tasks].task_sp = (char*)tasks[num_tasks].task_sp - 2;
+		*((uint16_t *)tasks[num_tasks].task_sp) = GIE; //Empty status register except for GIE flag
+
+		tasks[num_tasks].ready = 1;
 		num_tasks++;
 	}
 }
 
 void runScheduler() {
 	while(1) {
+		/*
 		int t;
 		for(t=0; t<num_tasks; t++) {
 			if(tasks[t].interval==0) {
@@ -39,6 +58,7 @@ void runScheduler() {
 				tasks[t].last_tick = ticks;
 			}
 		}
+		*/
 	}
 }
 
@@ -66,5 +86,10 @@ static void setupSchedulerTick() {
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void TIMER0_A0_ISR (void)
 {
-  ticks++;
+	if(tasks[0].ready) {
+		//Set stack pointer to the task's sp
+		taskSP = tasks[0].task_sp;
+		asm volatile(" mov taskSP, SP");
+	}
+	ticks++;
 }

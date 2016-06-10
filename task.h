@@ -15,11 +15,16 @@
 #define INTERVAL_100ms		100/SCHEDULER_TICK_MS
 #define INTERVAL_1000ms		1000/SCHEDULER_TICK_MS
 
+typedef void (*TaskRoutine)() ;
+
 typedef struct {
 	int interval;
 	int last_tick;
-	void (*routine) (void);
+	TaskRoutine routine;
+	void * task_sp; //Task stack pointer
+	int ready;
 } TaskDescriptor;
+
 
 
 

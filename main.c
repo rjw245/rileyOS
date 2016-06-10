@@ -7,6 +7,9 @@
 void Task1();
 void Task2();
 
+#define TASK1_STACK_BOTTOM		0x200
+#define TASK2_STACK_BOTTOM		0x400
+
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
@@ -15,8 +18,8 @@ int main(void) {
 
     initScheduler();
 
-    addTask(Task1, INTERVAL_100ms);
-    addTask(Task2, INTERVAL_1000ms);
+    addTask(Task1, INTERVAL_100ms, 50);
+    addTask(Task2, INTERVAL_1000ms, 50);
 
 	runScheduler();
 

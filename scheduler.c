@@ -9,8 +9,8 @@
 #include "rileyOS_config.h"
 #include "scheduler.h"
 #include <msp430.h>
-#include <stdlib.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 static TaskDescriptor tasks[MAX_TASKS];
 static unsigned int num_tasks;
@@ -18,13 +18,15 @@ static unsigned long ticks;
 
 volatile void * taskSP;
 
+static char task_stacks[MAX_TASKS][MAX_STACK_SIZE];
+
 void addTask(void (*routine)(), int interval, unsigned int stack_len) {
 	if(num_tasks < MAX_TASKS) {
 		TaskDescriptor new_task = {
 				.interval = interval,
 				.routine  = routine,
 				.last_tick = 0,
-				.task_sp = malloc(stack_len),
+				.task_sp = task_stacks[num_tasks],
 				.ready   = 0
 		};
 		new_task.task_sp = (char*)new_task.task_sp + stack_len;
@@ -45,6 +47,7 @@ void addTask(void (*routine)(), int interval, unsigned int stack_len) {
 }
 
 void runScheduler() {
+	setupSchedulerTick();
 	while(1) {
 		/*
 		int t;
@@ -64,7 +67,8 @@ void runScheduler() {
 
 void initScheduler() {
 	num_tasks = 0;
-	setupSchedulerTick();
+	srand(0xBEEF);
+	//addTask(idleTask,0,20);
 }
 
 static void setupSchedulerTick() {
@@ -83,12 +87,26 @@ static void setupSchedulerTick() {
 	__enable_interrupt();
 }
 
+/*
+ * Returns the number of the task to run next.
+ * This is the scheduling algorithm!!
+ */
+static int taskSwitch() {
+	int candidate = 0;
+	if(tasks[candidate].ready) { return candidate; }
+	else { return NO_TASK_SWITCH; }
+}
+
+static void idleTask() {
+	while(1);
+}
+
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void TIMER0_A0_ISR (void)
 {
-	if(tasks[0].ready) {
-		//Set stack pointer to the task's sp
-		taskSP = tasks[0].task_sp;
+	int taskNum = 1;
+	if(tasks[taskNum].ready) {
+		taskSP = tasks[taskNum].task_sp;
 		asm volatile(" mov taskSP, SP");
 	}
 	ticks++;

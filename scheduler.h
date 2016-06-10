@@ -31,6 +31,7 @@ void initScheduler();
 
 // PRIVATE MODULE FUNCTIONS
 static void setupSchedulerTick();
-
+static int taskSwitch();
+static void idleTask();
 
 #endif /* SCHEDULER_H_ */

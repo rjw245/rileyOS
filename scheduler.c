@@ -17,8 +17,9 @@ static unsigned int num_tasks;
 static unsigned long ticks;
 
 volatile void * taskSP;
+volatile int cur_task = 0;
 
-static char task_stacks[MAX_TASKS][MAX_STACK_SIZE];
+static uint16_t task_stacks[MAX_TASKS][MAX_STACK_WORDS];
 
 void addTask(void (*routine)(), int interval, unsigned int stack_len) {
 	if(num_tasks < MAX_TASKS) {
@@ -27,19 +28,24 @@ void addTask(void (*routine)(), int interval, unsigned int stack_len) {
 				.routine  = routine,
 				.last_tick = 0,
 				.task_sp = task_stacks[num_tasks],
+				.task_tos = MAX_STACK_WORDS-1, //All the way at the bottom
 				.ready   = 0
 		};
-		new_task.task_sp = (char*)new_task.task_sp + stack_len;
 
 		tasks[num_tasks] = new_task;
 
-		//Push task routine pointer onto stack, to be popped off later as the PC
-		tasks[num_tasks].task_sp = (char*)tasks[num_tasks].task_sp - 2;
-		*((TaskRoutine*)tasks[num_tasks].task_sp) = tasks[num_tasks].routine; //Initial PC value
+		int tos = tasks[num_tasks].task_tos;
 
-		//Push a 0 onto the stack, to be popped off later as the status register
-		tasks[num_tasks].task_sp = (char*)tasks[num_tasks].task_sp - 2;
-		*((uint16_t *)tasks[num_tasks].task_sp) = GIE; //Empty status register except for GIE flag
+		//Push task routine pointer onto stack, to be popped off later as the PC
+		tos--;
+		tasks[num_tasks].task_sp[tos] = (uint16_t)(tasks[num_tasks].routine); //Initial PC value
+
+		//Push a word onto the stack, to be popped off later as the status register
+		tos--;
+		tasks[num_tasks].task_sp[tos] = GIE; //Empty status register except for GIE flag
+
+		//Save back TOS
+		tasks[num_tasks].task_tos = tos;
 
 		tasks[num_tasks].ready = 1;
 		num_tasks++;
@@ -104,10 +110,16 @@ static void idleTask() {
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void TIMER0_A0_ISR (void)
 {
-	int taskNum = 1;
-	if(tasks[taskNum].ready) {
-		taskSP = tasks[taskNum].task_sp;
-		asm volatile(" mov taskSP, SP");
-	}
 	ticks++;
+	int tos = tasks[cur_task].task_tos;
+	taskSP = tasks[cur_task].task_sp+tos;
+	cur_task = (cur_task+1)%num_tasks;
+	asm volatile(" mov taskSP, SP");
+	asm volatile(" NOP");
+	asm volatile(" NOP");
+	asm volatile(" NOP");
+	asm volatile(" RETI"); //Manually return from interrupt
+	asm volatile(" NOP");
+	asm volatile(" NOP");
+	asm volatile(" NOP");
 }

@@ -9,8 +9,9 @@
 #define TASK_H_
 
 #include "rileyOS_config.h"
+#include <stdint.h>
 
-#define MAX_STACK_SIZE		100
+#define MAX_STACK_WORDS		50
 
 #define INTERVAL_1ms		1/SCHEDULER_TICK_MS
 #define INTERVAL_10ms		10/SCHEDULER_TICK_MS
@@ -25,7 +26,8 @@ typedef struct {
 	int interval;
 	int last_tick;
 	TaskRoutine routine;
-	void * task_sp; //Task stack pointer
+	uint16_t * task_sp; //Task stack pointer, uint16_t used so that it is aligned on words
+	int task_tos; //Index into task_sp, points to top of stack (tos)
 	int ready;
 } TaskDescriptor;
 

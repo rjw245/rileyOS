@@ -12,69 +12,36 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-static TaskDescriptor tasks[MAX_TASKS];
-static unsigned int num_tasks;
-static unsigned long ticks;
-
-volatile void * taskSP;
-volatile int cur_task = 0;
+static task_t task_list_head = NULL;
+static task_t task_list_tail = NULL;
 
 static uint16_t task_stacks[MAX_TASKS][MAX_STACK_WORDS];
 
-void addTask(void (*routine)(), int interval, unsigned int stack_len) {
-	if(num_tasks < MAX_TASKS) {
-		TaskDescriptor new_task = {
-				.interval = interval,
-				.routine  = routine,
-				.last_tick = 0,
-				.task_sp = task_stacks[num_tasks],
-				.task_tos = MAX_STACK_WORDS-1, //All the way at the bottom
-				.ready   = 0
-		};
-
-		tasks[num_tasks] = new_task;
-
-		int tos = tasks[num_tasks].task_tos;
-
-		//Push task routine pointer onto stack, to be popped off later as the PC
-		tos--;
-		tasks[num_tasks].task_sp[tos] = (uint16_t)(tasks[num_tasks].routine); //Initial PC value
-
-		//Push a word onto the stack, to be popped off later as the status register
-		tos--;
-		tasks[num_tasks].task_sp[tos] = GIE; //Empty status register except for GIE flag
-
-		//Save back TOS
-		tasks[num_tasks].task_tos = tos;
-
-		tasks[num_tasks].ready = 1;
-		num_tasks++;
-	}
+static task_t idle_task_handle;
+#define IDLE_TASK_STACK_LEN 64
+static uint8_t idle_task_stack[IDLE_TASK_STACK_LEN];
+static void idle_task(int now, void * input) {
+    while (1) {}
 }
 
-void runScheduler() {
-	setupSchedulerTick();
-	while(1) {
-		/*
-		int t;
-		for(t=0; t<num_tasks; t++) {
-			if(tasks[t].interval==0) {
-				//Continuous task, always run
-				(tasks[t].routine)();
-			} else if (ticks - tasks[t].last_tick >= tasks[t].interval) {
-				//Waited long enough, time to run this task
-				(tasks[t].routine)();
-				tasks[t].last_tick = ticks;
-			}
-		}
-		*/
-	}
+void scheduler_add_task(task_t * task_handle, task_func_t * func, void * task_stack) {
+    task_handle->func = func;
+    task_handle->task_sp = task_stack;
+    task_handle->next = NULL;
+
+    if((NULL == task_list_head) || (NULL == task_list_tail)) {
+        task_list_head = task_list_tail = task_handle;
+    } else {
+        task_list_tail->next = task_handle;
+    }
+}
+
+void scheduler_run() {
+
 }
 
 void initScheduler() {
-	num_tasks = 0;
-	srand(0xBEEF);
-	//addTask(idleTask,0,20);
+    scheduler_add_task(&idle_task_handle, &idle_task, &idle_task_stack[IDLE_TASK_STACK_LEN - 1]);
 }
 
 static void setupSchedulerTick() {

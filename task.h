@@ -27,7 +27,6 @@ typedef struct {
 	int last_tick;
 	TaskRoutine routine;
 	uint16_t * task_sp; //Task stack pointer, uint16_t used so that it is aligned on words
-	int task_tos; //Index into task_sp, points to top of stack (tos)
 	int ready;
 } TaskDescriptor;
 

@@ -12,81 +12,96 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-static task_t task_list_head = NULL;
-static task_t task_list_tail = NULL;
+#define NUM_REGISTERS 16
 
-static uint16_t task_stacks[MAX_TASKS][MAX_STACK_WORDS];
+static task_t * task_list_head = NULL;
+static task_t * task_list_tail = NULL;
 
 static task_t idle_task_handle;
 #define IDLE_TASK_STACK_LEN 64
-static uint8_t idle_task_stack[IDLE_TASK_STACK_LEN];
+static uint16_t idle_task_stack[IDLE_TASK_STACK_LEN/sizeof(uint16_t)];
 static void idle_task(int now, void * input) {
     while (1) {}
 }
+static void * cur_task_sp;
 
-void scheduler_add_task(task_t * task_handle, task_func_t * func, void * task_stack) {
-    task_handle->func = func;
-    task_handle->task_sp = task_stack;
-    task_handle->next = NULL;
+void do_context_switch(task_t * next_task) {
+    cur_task_sp = next_task->task_sp;
+    asm (" push r15 \n\t"
+         " push r14 \n\t"
+         " push r13 \n\t"
+         " push r12 \n\t"
+         " push r11 \n\t"
+         " push r10 \n\t"
+         " push r9 \n\t"
+         " push r8 \n\t"
+         " push r7 \n\t"
+         " push r6 \n\t"
+         " push r5 \n\t"
+         " push r4 \n\t"
+         " push r3 \n\t"
+         " push r2 \n\t"
+         " push r1 \n\t"
+         " push r0 \n\t"
+         " push sr \n\t"
+         " mov cur_task_sp, sp \n\t"
+         " pop sr \n\t"
+         " pop r0 \n\t"
+         " pop r1 \n\t"
+         " pop r2 \n\t"
+         " pop r3 \n\t"
+         " pop r4 \n\t"
+         " pop r5 \n\t"
+         " pop r6 \n\t"
+         " pop r7 \n\t"
+         " pop r8 \n\t"
+         " pop r9 \n\t"
+         " pop r10 \n\t"
+         " pop r11 \n\t"
+         " pop r12 \n\t"
+         " pop r13 \n\t"
+         " pop r14 \n\t"
+         " pop r15 \n\t");
+}
 
-    if((NULL == task_list_head) || (NULL == task_list_tail)) {
-        task_list_head = task_list_tail = task_handle;
-    } else {
-        task_list_tail->next = task_handle;
-    }
+void scheduler_add_task(task_t * task_handle, task_func_t func, void * task_stack_base) {
+//    task_handle->func = func;
+//    task_handle->task_sp = task_stack_base;
+//    task_handle->next = NULL;
+//
+//    // Store initial task context in the stack
+//    uint16_t * stack = (uint8_t *)task_stack_base;
+//
+//    // First, store the 20-bit PC and the status
+//    // register. These will get popped as a last step
+//    // when returning from the timer interrupt.
+//    *(stack++) = (uint16_t)func;
+//    *(stack++) = GIE; // Only set GIE in the status
+//                      // register we want to start with
+//                      // Upper 4 bits of PC are also stored
+//                      // here but are zeroed.
+//    int reg;
+//    for(reg=0; reg<NUM_REGISTERS; reg++) {
+//        *(stack++) = 0;
+//    }
+//    *(stack++) = 4; // Save interrupt state
+//
+//    if((0 == task_list_head) || (0 == task_list_tail)) {
+//        task_list_head = task_list_tail = task_handle;
+//    } else {
+//        task_list_tail->next = task_handle;
+//    }
 }
 
 void scheduler_run() {
 
 }
 
-void initScheduler() {
-    scheduler_add_task(&idle_task_handle, &idle_task, &idle_task_stack[IDLE_TASK_STACK_LEN - 1]);
+void scheduler_init() {
+    scheduler_add_task(&idle_task_handle, &idle_task, idle_task_stack);
 }
 
-static void setupSchedulerTick() {
-	ticks=0;
-	TA0CTL |= MC_0; //Stop timer A during setup
-	TA0CCR0 = 32*SCHEDULER_TICK_MS; //Assume ACLK=32kHz
+void scheduler_tick() {
 
-	/*
-	 * Clock source: ACLK
-	 * Mode: Count up to CCR repeatedly (and start)
-	 * Divisor: 1
-	 * and clear the clock
-	 */
-	TA0CTL =  TASSEL__ACLK|MC__UP|ID__1|TACLR;
-	TA0CCTL0 = CCIE; //Enable interrupt for CCR0
-	__enable_interrupt();
 }
 
-/*
- * Returns the number of the task to run next.
- * This is the scheduling algorithm!!
- */
-static int taskSwitch() {
-	int candidate = 0;
-	if(tasks[candidate].ready) { return candidate; }
-	else { return NO_TASK_SWITCH; }
-}
-
-static void idleTask() {
-	while(1);
-}
-
-#pragma vector=TIMER0_A0_VECTOR
-__interrupt void TIMER0_A0_ISR (void)
-{
-	ticks++;
-	int tos = tasks[cur_task].task_tos;
-	taskSP = tasks[cur_task].task_sp+tos;
-	cur_task = (cur_task+1)%num_tasks;
-	asm volatile(" mov taskSP, SP");
-	asm volatile(" NOP");
-	asm volatile(" NOP");
-	asm volatile(" NOP");
-	asm volatile(" RETI"); //Manually return from interrupt
-	asm volatile(" NOP");
-	asm volatile(" NOP");
-	asm volatile(" NOP");
-}

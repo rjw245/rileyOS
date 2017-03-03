@@ -12,4 +12,5 @@
 	<createSlaveProjects value=""/>
 	<templateProperties value="id=com.ti.ccstudio.project.templates.helloWorld_msp430,"/>
 	<filesToOpen value="hello.c,"/>
+	<isTargetManual value="false"/>
 </projectOptions>

@@ -10,6 +10,8 @@ void Task2();
 static int i;
 static int j;
 
+
+
 #define TASK1_STACK_BOTTOM		0x200
 #define TASK2_STACK_BOTTOM		0x400
 
@@ -19,15 +21,13 @@ int main(void) {
     P1DIR |= 0x01;
     P4DIR |= 0x01;
 
-    initScheduler();
+    do_context_switch(NULL);
 
-    addTask(Task1, INTERVAL_100ms, 20);
-    addTask(Task2, INTERVAL_1000ms, 20);
-
-	runScheduler();
-
-	return 0;
+    return 0;
 }
+const int x = sizeof(void *);
+const int y = sizeof(&main);
+
 
 void Task1() {
 	while(1) {

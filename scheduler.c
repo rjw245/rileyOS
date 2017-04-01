@@ -29,9 +29,11 @@ static void idle_task(int now, void * input) {
 }
 
 
-void scheduler_add_task(task_t * task_handle, task_func_t func, uint16_t * task_stack, uint16_t stack_bytes) {
+void scheduler_add_task(task_t * task_handle, const char * name,
+                        task_func_t func, uint16_t * task_stack, uint16_t stack_bytes) {
     task_handle->func = func;
     task_handle->next = NULL;
+    task_handle->name = name;
 
     // Store initial task context in the stack
     uint16_t * stack = &task_stack[(stack_bytes/sizeof(uint16_t))-1];
@@ -98,7 +100,7 @@ void scheduler_init( void ) {
     #define IDLE_TASK_STACK_LEN 512
     static uint16_t idle_task_stack[IDLE_TASK_STACK_LEN/sizeof(uint16_t)];
 
-    scheduler_add_task(&idle_task_handle, &idle_task, idle_task_stack, sizeof(idle_task_stack));
+    scheduler_add_task(&idle_task_handle, "IDLE", &idle_task, idle_task_stack, sizeof(idle_task_stack));
 }
 
 static void setupSchedulerTick( void ) {
@@ -167,6 +169,9 @@ __interrupt void TIMER0_A0_ISR (void)
     asm (" popx.a r13 \n\t");
     asm (" popx.a r14 \n\t");
     asm (" popx.a r15 \n\t");
+
+    asm (" mov sp, next_task_sp \n\t");
+    next_task->task_sp = next_task_sp;
 
     asm (" RETI \n\t");
 }

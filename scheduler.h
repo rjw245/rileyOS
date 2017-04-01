@@ -12,10 +12,11 @@
 
 typedef void (*task_func_t)(int now, void * input) ;
 
-typedef struct task_private_s {
+typedef volatile struct task_private_s {
     task_func_t func;
-    volatile void * task_sp; //Task stack pointer
-    struct task_private_s * next;
+    const char * name;
+    void * task_sp; //Task stack pointer
+    volatile struct task_private_s * next;
 } task_t;
 
 
@@ -26,7 +27,8 @@ typedef struct task_private_s {
  * onto the new task stack so they can be popped off later
  * from the task switch interrupt.
  */
-void scheduler_add_task(task_t * task_handle, task_func_t func, uint16_t * task_stack, uint16_t stack_bytes);
+void scheduler_add_task(task_t * task_handle, const char * name,
+                        task_func_t func, uint16_t * task_stack, uint16_t stack_bytes);
 
 /**
  *  Kicks off the timer interrupt

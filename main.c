@@ -25,7 +25,7 @@ int main(void) {
     static task_t task1_handle;
     #define TASK1_STACK_LEN 512
     static uint16_t task1_stack[TASK1_STACK_LEN/sizeof(uint16_t)];
-    scheduler_add_task(&task1_handle, &Task1, task1_stack, sizeof(task1_stack));
+    scheduler_add_task(&task1_handle, "Task1", &Task1, task1_stack, sizeof(task1_stack));
 
     scheduler_run();
 

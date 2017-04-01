@@ -119,7 +119,6 @@ static void setupSchedulerTick( void ) {
 }
 
 
-static volatile task_t * volatile cur_task = NULL;
 static volatile void * volatile cur_task_sp;
 static volatile void * volatile next_task_sp;
 
@@ -127,7 +126,7 @@ static volatile void * volatile next_task_sp;
 __interrupt void TIMER0_A0_ISR (void)
 {
     // Must be static, can't use stack
-    static volatile task_t * volatile cur_task;
+    static volatile task_t * volatile cur_task = NULL;
     static volatile task_t * volatile next_task;
 
     asm (" POPM.A #5,R15 \n\t");

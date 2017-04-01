@@ -19,7 +19,14 @@ typedef volatile struct task_private_s {
     volatile struct task_private_s * volatile next;
 } task_t;
 
-
+#define SCHEDULER_ADD(func, stack_size) \
+    static task_t task_##__FILE__##__LINE__##func; \
+    static uint16_t task_stack_##__FILE__##__LINE__##func[(stack_size)/sizeof(uint16_t)]; \
+    scheduler_add_task(&task_##__FILE__##__LINE__##func, \
+                       #func, \
+                       func, \
+                       task_stack_##__FILE__##__LINE__##func, \
+                       sizeof(task_stack_##__FILE__##__LINE__##func));
 
 /**
  * Add task to task list to be run at next context switch.

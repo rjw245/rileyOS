@@ -32,7 +32,7 @@ int main(void) {
     return 0;
 }
 
-void Task1(int now, void * input) {
+void Task1( void ) {
 	while(1) {
 		//Flash LED P1.0
 		P1OUT ^= 0x01;

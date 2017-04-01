@@ -24,7 +24,7 @@ static void setupSchedulerTick( void );
 static inline volatile task_t * task_queue_rotate( void );
 static inline volatile task_t * task_queue_current( void );
 
-static void idle_task(int now, void * input) {
+static void idle_task( void ) {
     while (1) {}
 }
 
@@ -119,18 +119,18 @@ static void setupSchedulerTick( void ) {
 }
 
 
-static volatile task_t * cur_task = NULL;
-static volatile void * cur_task_sp;
-static volatile void * next_task_sp;
+static volatile task_t * volatile cur_task = NULL;
+static volatile void * volatile cur_task_sp;
+static volatile void * volatile next_task_sp;
 
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void TIMER0_A0_ISR (void)
 {
     // Must be static, can't use stack
-    static volatile task_t * cur_task;
-    static volatile task_t * next_task;
+    static volatile task_t * volatile cur_task;
+    static volatile task_t * volatile next_task;
 
-    next_task = task_queue_rotate();
+    asm (" POPM.A #5,R15 \n\t");
 
     asm (" pushx.a r15 \n\t");
     asm (" pushx.a r14 \n\t");
@@ -152,6 +152,8 @@ __interrupt void TIMER0_A0_ISR (void)
                                          // task struct so we can get it back later
                                          // (ONLY IF WE ARE CURRENTLY IN A TASK)
     }
+
+    next_task = task_queue_rotate();
     cur_task = next_task;
 
     next_task_sp = next_task->task_sp;
@@ -169,9 +171,6 @@ __interrupt void TIMER0_A0_ISR (void)
     asm (" popx.a r13 \n\t");
     asm (" popx.a r14 \n\t");
     asm (" popx.a r15 \n\t");
-
-    asm (" mov sp, next_task_sp \n\t");
-    next_task->task_sp = next_task_sp;
 
     asm (" RETI \n\t");
 }

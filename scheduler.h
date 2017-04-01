@@ -10,13 +10,13 @@
 
 #include <stdint.h>
 
-typedef void (*task_func_t)(int now, void * input) ;
+typedef void (*task_func_t)( void ) ;
 
 typedef volatile struct task_private_s {
     task_func_t func;
     const char * name;
-    void * task_sp; //Task stack pointer
-    volatile struct task_private_s * next;
+    void * volatile task_sp; //Task stack pointer
+    volatile struct task_private_s * volatile next;
 } task_t;
 
 

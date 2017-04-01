@@ -21,15 +21,19 @@ int main(void) {
     P1DIR |= 0x01;
     P4DIR |= 0x01;
 
-    do_context_switch(NULL);
+    scheduler_init();
+
+    static task_t task1_handle;
+    #define TASK1_STACK_LEN 512
+    static uint16_t task1_stack[TASK1_STACK_LEN/sizeof(uint16_t)];
+    scheduler_add_task(&task1_handle, &Task1, task1_stack, sizeof(task1_stack));
+
+    scheduler_run();
 
     return 0;
 }
-const int x = sizeof(void *);
-const int y = sizeof(&main);
 
-
-void Task1() {
+void Task1(int now, void * input) {
 	while(1) {
 		//Flash LED P1.0
 		P1OUT ^= 0x01;
@@ -37,7 +41,7 @@ void Task1() {
 	}
 }
 
-void Task2() {
+void Task2(int now, void * input) {
 	while(1) {
 		//Flash LED P4.0
 		P4OUT ^= 0x01;

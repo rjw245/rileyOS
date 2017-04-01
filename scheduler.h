@@ -5,42 +5,37 @@
  *      Author: riley
  */
 
-#ifndef SCHEDULER_H_
-#define SCHEDULER_H_
+#ifndef SCHEDULER_H
+#define SCHEDULER_H
 
-
-// PUBLIC API
-
+#include <stdint.h>
 
 typedef void (*task_func_t)(int now, void * input) ;
 
-typedef struct struct_task_t {
+typedef struct task_private_s {
     task_func_t func;
-    void * task_sp; //Task stack pointer
-    int task_tos; //Index into task_sp, points to top of stack (tos)
-    struct struct_task_t * next;
+    volatile void * task_sp; //Task stack pointer
+    struct task_private_s * next;
 } task_t;
 
 
+
 /**
- * Add task to task list
- * Allocate task stack
+ * Add task to task list to be run at next context switch.
  * Push task routine pointer and empty status register
  * onto the new task stack so they can be popped off later
- * from the task switch interrupt
+ * from the task switch interrupt.
  */
-void scheduler_add_task(task_t * task_handle, task_func_t func, void * task_stack_base);
+void scheduler_add_task(task_t * task_handle, task_func_t func, uint16_t * task_stack, uint16_t stack_bytes);
 
 /**
- *
+ *  Kicks off the timer interrupt
  */
-void scheduler_run();
+void scheduler_run( void );
 
 /**
- *
+ *  Sets up the idle task
  */
-void scheduler_init();
+void scheduler_init( void );
 
-void scheduler_tick();
-
-#endif /* SCHEDULER_H_ */
+#endif /* SCHEDULER_H */

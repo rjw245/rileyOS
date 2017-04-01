@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <msp430.h>
 #include "rileyOS_config.h"
-#include "task.h"
 #include "scheduler.h"
 
 void Task1();

@@ -5,7 +5,6 @@
  *      Author: riley
  */
 
-#include "task.h"
 #include "rileyOS_config.h"
 #include "scheduler.h"
 #include <msp430.h>

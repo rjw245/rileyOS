@@ -96,11 +96,7 @@ void scheduler_run( void ) {
 }
 
 void scheduler_init( void ) {
-    static task_t idle_task_handle;
-    #define IDLE_TASK_STACK_LEN 512
-    static uint16_t idle_task_stack[IDLE_TASK_STACK_LEN/sizeof(uint16_t)];
-
-    scheduler_add_task(&idle_task_handle, "IDLE", &idle_task, idle_task_stack, sizeof(idle_task_stack));
+    SCHEDULER_ADD(idle_task, 64);
 }
 
 static void setupSchedulerTick( void ) {

@@ -19,6 +19,11 @@ typedef volatile struct task_private_s {
     volatile struct task_private_s * volatile next;
 } task_t;
 
+/**
+ * Handy macro which blackboxes the allocation of memory
+ * per task. Accepts the task function to schedule
+ * and the size of stack to allocate as arguments.
+ */
 #define SCHEDULER_ADD(func, stack_size) \
     static task_t task_##__FILE__##__LINE__##func; \
     static uint16_t task_stack_##__FILE__##__LINE__##func[(stack_size)/sizeof(uint16_t)]; \

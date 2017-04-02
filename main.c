@@ -6,6 +6,7 @@
 
 static void Task1( void );
 static void Task2( void );
+static void empty_task( void ) { while(1); }
 static void LCDTask( void );
 
 #define TASK1_STACK_BOTTOM		0x200
@@ -18,10 +19,16 @@ int main(void) {
     P1DIR |= 0x01;                          // Set P1.0 to output direction
     P4DIR |= 0x01;
 
+    LCDTask();
     scheduler_init();
     SCHEDULER_ADD(Task1, 512);
     SCHEDULER_ADD(Task2, 512);
     SCHEDULER_ADD(LCDTask, 512);
+
+    SCHEDULER_ADD(empty_task, 64);
+    SCHEDULER_ADD(empty_task, 64);
+    SCHEDULER_ADD(empty_task, 64);
+
     scheduler_run();
 
     return 0;
@@ -51,3 +58,4 @@ static void LCDTask( void ) {
         displayScrollText("DEADBEEF0123");
     }
 }
+

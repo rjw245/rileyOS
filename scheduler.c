@@ -22,7 +22,6 @@ static void setupSchedulerTick( void );
  * (does not remove from queue, != pop)
  */
 static inline volatile task_t * task_queue_rotate( void );
-static inline volatile task_t * task_queue_current( void );
 
 static void idle_task( void ) {
     while (1) {}
@@ -78,10 +77,6 @@ static inline volatile task_t * task_queue_rotate( void ) {
     volatile task_t * ret = task_queue_head;
     task_queue_head = task_queue_head->next;
     return ret;
-}
-
-static inline volatile task_t * task_queue_current( void ) {
-    return task_queue_head;
 }
 
 void scheduler_run( void ) {

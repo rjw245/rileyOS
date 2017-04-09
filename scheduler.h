@@ -15,8 +15,8 @@ typedef void (*task_func_t)( void ) ;
 
 typedef volatile struct task_private_s {
     const char * name;
-    void * volatile task_sp; //Task stack pointer
-    volatile struct task_private_s * volatile next;
+    volatile void * task_sp; //Task stack pointer
+    volatile struct task_private_s * next;
 } task_t;
 
 

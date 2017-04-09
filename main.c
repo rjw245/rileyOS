@@ -33,7 +33,7 @@ static void Task1( void ) {
 	while(1) {
 		//Flash LED P1.0
 		P1OUT ^= 0x01;
-		static int i;
+		int i;
 		for(i=0; i<10000; i++);
 	}
 }
@@ -42,7 +42,7 @@ static void Task2( void ) {
 	while(1) {
 		//Flash LED P4.0
 		P4OUT ^= 0x01;
-        static int i;
+        int i;
         for(i=0; i<9000; i++);
 	}
 }

@@ -30,7 +30,6 @@ static void idle_task( void ) {
 
 void scheduler_add_task(task_t * task_handle, const char * name,
                         task_func_t func, uint16_t * task_stack, uint16_t stack_bytes) {
-    task_handle->func = func;
     task_handle->next = NULL;
     task_handle->name = name;
 

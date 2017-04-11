@@ -119,7 +119,7 @@ __interrupt void TIMER0_A0_ISR (void)
     static volatile task_t * volatile cur_task = NULL;
     static volatile task_t * volatile next_task;
 
-    // Fight the compiler, undo it's register pushing
+    // Fight the compiler, undo its register pushing
     asm (" POPM.A #5,R15 \n\t");
 
     // Push all GP registers onto current task stack

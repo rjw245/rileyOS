@@ -26,8 +26,11 @@ void scheduler_init( void );
 /**
  * Add task to task list to be run at next context switch.
  */
-void scheduler_add_task(task_t * task_handle, const char * name,
-                        task_func_t func, uint16_t * task_stack, uint16_t stack_bytes);
+void scheduler_add_task(task_t * task_handle,
+                        const char * name,
+                        task_func_t func,
+                        uint16_t * task_stack,
+                        uint16_t stack_bytes);
 
 /// Kicks off the timer interrupt
 void scheduler_run( void );

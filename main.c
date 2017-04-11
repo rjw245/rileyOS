@@ -8,16 +8,10 @@ static void Task1( void );
 static void Task2( void );
 static void LCDTask( void );
 
-#define TASK1_STACK_BOTTOM		0x200
-#define TASK2_STACK_BOTTOM		0x400
-
 int main(void) {
-    WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
-    PM5CTL0 &= ~LOCKLPM5;                   // Disable the GPIO power-on default high-impedance mode
-                                            // to activate previously configured port settings
-    P1DIR |= 0x01;                          // Set P1.0 to output direction
-    P4DIR |= 0x01;
-
+    WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
+    PM5CTL0 &= ~LOCKLPM5;       // Disable the GPIO power-on default high-impedance mode
+                                // to activate previously configured port settings
     scheduler_init();
 
     SCHEDULER_ADD(Task1, 512);
@@ -30,6 +24,7 @@ int main(void) {
 }
 
 static void Task1( void ) {
+    P1DIR |= 0x01; // Set LED P1.0 as output
 	while(1) {
 		//Flash LED P1.0
 		P1OUT ^= 0x01;
@@ -39,6 +34,7 @@ static void Task1( void ) {
 }
 
 static void Task2( void ) {
+    P4DIR |= 0x01; // Set LED P4.0 as output
 	while(1) {
 		//Flash LED P4.0
 		P4OUT ^= 0x01;

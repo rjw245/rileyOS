@@ -26,27 +26,21 @@ int main(void) {
 static void Task1( void ) {
     P1DIR |= 0x01; // Set LED P1.0 as output
 	while(1) {
-		//Flash LED P1.0
-		P1OUT ^= 0x01;
-		int i;
-		for(i=0; i<10000; i++);
+		P1OUT ^= 0x01; // Flash LED P1.0
+		int i; for(i=0; i<10000; i++);
 	}
 }
 
 static void Task2( void ) {
     P4DIR |= 0x01; // Set LED P4.0 as output
 	while(1) {
-		//Flash LED P4.0
-		P4OUT ^= 0x01;
-        int i;
-        for(i=0; i<9000; i++);
+		P4OUT ^= 0x01; // Flash LED P4.0
+        int i; for(i=0; i<9000; i++);
 	}
 }
 
 static void LCDTask( void ) {
     Init_LCD();
-    while(1) {
-        displayScrollText("DEADBEEF0123");
-    }
+    while(1) { displayScrollText("DEADBEEF0123"); }
 }
 

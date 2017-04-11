@@ -116,8 +116,7 @@ static volatile void * volatile next_task_sp;
 __interrupt void TIMER0_A0_ISR (void)
 {
     // Must be static, can't use stack
-    static volatile task_t * volatile cur_task = NULL;
-    static volatile task_t * volatile next_task;
+    static volatile task_t * volatile task_ptr = NULL;
 
     // Fight the compiler, undo its register pushing
     asm (" POPM.A #5,R15 \n\t");
@@ -128,15 +127,14 @@ __interrupt void TIMER0_A0_ISR (void)
 
     // Save current task stack pointer
     // (ONLY IF WE ARE CURRENTLY IN A TASK)
-    if(cur_task != NULL) {
-        cur_task->task_sp = cur_task_sp;
+    if(task_ptr != NULL) {
+        task_ptr->task_sp = cur_task_sp;
     }
 
-    next_task = task_queue_rotate();
-    cur_task = next_task;
+    task_ptr = task_queue_rotate();
 
     // Change stacks
-    next_task_sp = next_task->task_sp;
+    next_task_sp = task_ptr->task_sp;
     asm (" mov next_task_sp, sp \n\t");
 
     // Restore all GP registers from new stack

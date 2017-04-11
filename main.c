@@ -10,8 +10,8 @@ static void LCDTask( void );
 
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
-    PM5CTL0 &= ~LOCKLPM5;       // Disable the GPIO power-on default high-impedance mode
-                                // to activate previously configured port settings
+    PM5CTL0 &= ~LOCKLPM5;       // Disable GPIO power-on
+                                // default high-impedance mode
     scheduler_init();
 
     SCHEDULER_ADD(Task1, 512);

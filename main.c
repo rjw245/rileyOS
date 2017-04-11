@@ -4,6 +4,7 @@
 #include "scheduler.h"
 #include "hal_LCD.h"
 
+static void schedule_and_run( void );
 static void Task1( void );
 static void Task2( void );
 static void LCDTask( void );
@@ -12,6 +13,11 @@ int main(void) {
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
     PM5CTL0 &= ~LOCKLPM5;       // Disable GPIO power-on
                                 // default high-impedance mode
+    schedule_and_run();
+    return 0;
+}
+
+static void schedule_and_run( void ) {
     scheduler_init();
 
     SCHEDULER_ADD(Task1, 512);
@@ -19,8 +25,6 @@ int main(void) {
     SCHEDULER_ADD(LCDTask, 512);
 
     scheduler_run();
-
-    return 0;
 }
 
 static void Task1( void ) {

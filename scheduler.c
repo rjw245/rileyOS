@@ -109,8 +109,7 @@ static void setupSchedulerTick( void ) {
 }
 
 
-static volatile void * volatile cur_task_sp;
-static volatile void * volatile next_task_sp;
+static volatile void * volatile task_sp;
 
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void TIMER0_A0_ISR (void)
@@ -123,19 +122,19 @@ __interrupt void TIMER0_A0_ISR (void)
 
     // Push all GP registers onto current task stack
     asm (" pushm.a #12, r15 \n\t");
-    asm (" mov sp, cur_task_sp \n\t");
+    asm (" mov sp, task_sp \n\t");
 
     // Save current task stack pointer
     // (ONLY IF WE ARE CURRENTLY IN A TASK)
     if(task_ptr != NULL) {
-        task_ptr->task_sp = cur_task_sp;
+        task_ptr->task_sp = task_sp;
     }
 
     task_ptr = task_queue_rotate();
 
     // Change stacks
-    next_task_sp = task_ptr->task_sp;
-    asm (" mov next_task_sp, sp \n\t");
+    task_sp = task_ptr->task_sp;
+    asm (" mov task_sp, sp \n\t");
 
     // Restore all GP registers from new stack
     asm (" popm.a #12, r15 \n\t");

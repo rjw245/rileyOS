@@ -119,47 +119,28 @@ __interrupt void TIMER0_A0_ISR (void)
     static volatile task_t * volatile cur_task = NULL;
     static volatile task_t * volatile next_task;
 
+    // Fight the compiler, undo it's register pushing
     asm (" POPM.A #5,R15 \n\t");
 
-    asm (" pushx.a r15 \n\t");
-    asm (" pushx.a r14 \n\t");
-    asm (" pushx.a r13 \n\t");
-    asm (" pushx.a r12 \n\t");
-    asm (" pushx.a r11 \n\t");
-    asm (" pushx.a r10 \n\t");
-    asm (" pushx.a r9 \n\t");
-    asm (" pushx.a r8 \n\t");
-    asm (" pushx.a r7 \n\t");
-    asm (" pushx.a r6 \n\t");
-    asm (" pushx.a r5 \n\t");
-    asm (" pushx.a r4 \n\t");
-
+    // Push all GP registers onto current task stack
+    asm (" pushm.a #12, r15 \n\t");
     asm (" mov sp, cur_task_sp \n\t");
 
+    // Save current task stack pointer
+    // (ONLY IF WE ARE CURRENTLY IN A TASK)
     if(cur_task != NULL) {
-        cur_task->task_sp = cur_task_sp; // Store the stack pointer back in our
-                                         // task struct so we can get it back later
-                                         // (ONLY IF WE ARE CURRENTLY IN A TASK)
+        cur_task->task_sp = cur_task_sp;
     }
 
     next_task = task_queue_rotate();
     cur_task = next_task;
 
+    // Change stacks
     next_task_sp = next_task->task_sp;
     asm (" mov next_task_sp, sp \n\t");
 
-    asm (" popx.a r4 \n\t");
-    asm (" popx.a r5 \n\t");
-    asm (" popx.a r6 \n\t");
-    asm (" popx.a r7 \n\t");
-    asm (" popx.a r8 \n\t");
-    asm (" popx.a r9 \n\t");
-    asm (" popx.a r10 \n\t");
-    asm (" popx.a r11 \n\t");
-    asm (" popx.a r12 \n\t");
-    asm (" popx.a r13 \n\t");
-    asm (" popx.a r14 \n\t");
-    asm (" popx.a r15 \n\t");
+    // Restore all GP registers from new stack
+    asm (" popm.a #12, r15 \n\t");
 
     asm (" RETI \n\t");
 }

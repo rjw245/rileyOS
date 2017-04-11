@@ -25,9 +25,6 @@ void scheduler_init( void );
 
 /**
  * Add task to task list to be run at next context switch.
- * Push task routine pointer and empty status register
- * onto the new task stack so they can be popped off later
- * from the task switch interrupt.
  */
 void scheduler_add_task(task_t * task_handle, const char * name,
                         task_func_t func, uint16_t * task_stack, uint16_t stack_bytes);

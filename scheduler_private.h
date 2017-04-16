@@ -8,6 +8,13 @@
 #ifndef SCHEDULER_PRIVATE_H_
 #define SCHEDULER_PRIVATE_H_
 
+volatile struct task_private_s {
+    const char * name;
+    volatile void * task_sp; //Task stack pointer
+    volatile struct task_private_s * next;
+    volatile uint32_t sleep_start_ms;
+    volatile uint32_t sleep_for_ms;
+};
 
 /*********** PRIVATE MACROS *************/
 
@@ -34,7 +41,9 @@
 #define CALL_SCHEDULER_ADD(line, func) \
     CALL_SCHEDULER_ADD_INDIRECT(line, func)
 
-/*********** PRIVATE MACROS *************/
+/*********** PRIVATE FUNCTIONS *************/
 
+volatile struct task_private_s * scheduler_get_current_task( void );
+volatile uint32_t scheduler_now( void );
 
 #endif /* SCHEDULER_PRIVATE_H_ */

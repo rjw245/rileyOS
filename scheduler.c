@@ -7,6 +7,7 @@
 
 #include "rileyOS_config.h"
 #include "scheduler.h"
+#include "scheduler_private.h"
 #include <msp430.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -14,6 +15,7 @@
 #define NUM_REGISTERS 16
 
 static volatile task_t * task_queue_head = NULL;
+static volatile uint32_t scheduler_now_ms = 0;
 
 static void setupSchedulerTick( void );
 
@@ -21,7 +23,7 @@ static void setupSchedulerTick( void );
  * Return the next item in the queue
  * (does not remove from queue, != pop)
  */
-static inline volatile task_t * task_queue_rotate( void );
+static inline volatile task_t * task_queue_get_next( void );
 
 static void idle_task( void ) {
     while (1) {}
@@ -32,6 +34,8 @@ void scheduler_add_task(task_t * task_handle, const char * name,
                         task_func_t func, uint16_t * task_stack, uint16_t stack_bytes) {
     task_handle->next = NULL;
     task_handle->name = name;
+    task_handle->sleep_start_ms = 0;
+    task_handle->sleep_for_ms = 0;
 
     // Store initial task context in the stack
     uint16_t * stack = &task_stack[(stack_bytes/sizeof(uint16_t))-1];
@@ -72,10 +76,18 @@ void scheduler_add_task(task_t * task_handle, const char * name,
     }
 }
 
-static inline volatile task_t * task_queue_rotate( void ) {
-    volatile task_t * ret = task_queue_head;
+static inline volatile task_t * task_queue_get_next( void ) {
+    volatile task_t * ret = task_queue_head->next;
     task_queue_head = task_queue_head->next;
     return ret;
+}
+
+volatile task_t * scheduler_get_current_task( void ) {
+    return task_queue_head;
+}
+
+volatile uint32_t scheduler_now( void ) {
+    return scheduler_now_ms;
 }
 
 void scheduler_run( void ) {
@@ -130,7 +142,12 @@ __interrupt void TIMER0_A0_ISR (void)
         task_ptr->task_sp = task_sp;
     }
 
-    task_ptr = task_queue_rotate();
+    do {
+        task_ptr = task_queue_get_next();
+    } while((task_ptr->sleep_for_ms != 0) &&
+            ((task_ptr->sleep_for_ms + task_ptr->sleep_start_ms) > scheduler_now()));
+    task_ptr->sleep_for_ms = 0;
+    scheduler_now_ms += SCHEDULER_TICK_MS; // TODO don't assume regular intervals
 
     // Change stacks
     task_sp = task_ptr->task_sp;

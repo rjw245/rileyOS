@@ -11,13 +11,10 @@
 #include <stdint.h>
 #include "scheduler_private.h"
 
-typedef void (*task_func_t)( void ) ;
+typedef volatile struct task_private_s task_t;
 
-typedef volatile struct task_private_s {
-    const char * name;
-    volatile void * task_sp; //Task stack pointer
-    volatile struct task_private_s * next;
-} task_t;
+typedef void (*task_func_t)( void );
+
 
 
 /// Sets up the idle task

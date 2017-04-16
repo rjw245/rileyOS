@@ -2,12 +2,13 @@
 #include <msp430.h>
 #include "rileyOS_config.h"
 #include "scheduler.h"
+#include "task.h"
 #include "hal_LCD.h"
 
 static void schedule_and_run( void );
 static void Task1( void );
 static void Task2( void );
-static void LCDTask( void );
+static void LCDTASK( void );
 
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
@@ -22,7 +23,7 @@ static void schedule_and_run( void ) {
 
     SCHEDULER_ADD(Task1, 512);
     SCHEDULER_ADD(Task2, 512);
-    SCHEDULER_ADD(LCDTask, 512);
+    SCHEDULER_ADD(LCDTASK, 512);
 
     scheduler_run();
 }
@@ -31,7 +32,7 @@ static void Task1( void ) {
     P1DIR |= 0x01; // Set LED P1.0 as output
     while(1) {
         P1OUT ^= 0x01; // Flash LED P1.0
-        int i; for(i=0; i<10000; i++);
+        task_sleep(100);
     }
 }
 
@@ -39,12 +40,15 @@ static void Task2( void ) {
     P4DIR |= 0x01; // Set LED P4.0 as output
     while(1) {
         P4OUT ^= 0x01; // Flash LED P4.0
-        int i; for(i=0; i<9000; i++);
+        task_sleep(500);
     }
 }
 
-static void LCDTask( void ) {
+static void LCDTASK( void ) {
     Init_LCD();
-    while(1) { displayScrollText("DEADBEEF0123"); }
+    while(1) {
+        char * task_name = task_get_name();
+        displayScrollText(task_name);
+    }
 }
 

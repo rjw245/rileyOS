@@ -43,6 +43,7 @@
 #include "hal_LCD.h"
 #include "string.h"
 #include "lcd_e.h"
+#include "task.h"
 
 // LCD memory map for numeric digits
 const char digit[10][2] =
@@ -157,7 +158,7 @@ void displayScrollText(char *msg)
         showChar(buffer[4], pos5);
         showChar(buffer[5], pos6);
 
-        __delay_cycles(40000);
+        task_sleep(400);
     }
 }
 

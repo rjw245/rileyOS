@@ -9,6 +9,8 @@ static void schedule_and_run( void );
 static void Task1( void );
 static void Task2( void );
 static void LCDTASK( void );
+static void WRITEBAR( void );
+static void WRITEFOO( void );
 
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
@@ -21,9 +23,9 @@ int main(void) {
 static void schedule_and_run( void ) {
     scheduler_init();
 
-    SCHEDULER_ADD(Task1, 512);
-    SCHEDULER_ADD(Task2, 512);
-    SCHEDULER_ADD(LCDTASK, 512);
+    SCHEDULER_ADD(Task1, 256);
+    SCHEDULER_ADD(Task2, 256);
+    SCHEDULER_ADD(LCDTASK, 256);
 
     scheduler_run();
 }
@@ -46,9 +48,21 @@ static void Task2( void ) {
 
 static void LCDTASK( void ) {
     Init_LCD();
+    SCHEDULER_ADD(WRITEFOO, 256);
+    task_sleep(1400);
+    SCHEDULER_ADD(WRITEBAR, 256);
+    task_join();
+}
+
+static void WRITEBAR( void ) {
     while(1) {
-        char * task_name = task_get_name();
-        displayScrollText(task_name);
+        displayScrollText("BAR");
+    }
+}
+
+static void WRITEFOO( void ) {
+    while(1) {
+        displayScrollText("FOO");
     }
 }
 

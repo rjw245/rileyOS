@@ -16,5 +16,6 @@
 
 void task_sleep( uint32_t milliseconds );
 const char * task_get_name( void );
+void task_join( void );
 
 #endif /* TASK_H_ */

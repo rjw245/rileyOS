@@ -33,6 +33,7 @@ static void idle_task( void ) {
 void scheduler_add_task(task_t * task_handle, const char * name,
                         task_func_t func, uint16_t * task_stack, uint16_t stack_bytes) {
     task_handle->next = NULL;
+    task_handle->prev = NULL;
     task_handle->name = name;
     task_handle->sleep_start_ms = 0;
     task_handle->sleep_for_ms = 0;
@@ -69,9 +70,12 @@ void scheduler_add_task(task_t * task_handle, const char * name,
     if(0 == task_queue_head) {
         task_queue_head = task_handle;
         task_queue_head->next = task_queue_head; //Queue of one wraps around on itself
+        task_queue_head->prev = task_queue_head; //Queue of one wraps around on itself
     } else {
         // Insert between head and head + 1
         task_handle->next = task_queue_head->next;
+        task_queue_head->next->prev = task_handle;
+        task_handle->prev = task_queue_head;
         task_queue_head->next = task_handle;
     }
 }

@@ -11,6 +11,7 @@
 volatile struct task_private_s {
     const char * name;
     volatile void * task_sp; //Task stack pointer
+    volatile struct task_private_s * prev;
     volatile struct task_private_s * next;
     volatile uint32_t sleep_start_ms;
     volatile uint32_t sleep_for_ms;

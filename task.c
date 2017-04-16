@@ -30,3 +30,13 @@ const char * task_get_name( void ) {
     __enable_interrupt();
     return name;
 }
+
+void task_join( void ) {
+    // Remove current task from the scheduler's task queue
+    task_t * cur_task = scheduler_get_current_task();
+    task_t * prev_task = cur_task->prev;
+    prev_task->next = cur_task->next;
+
+    // Wait for context switch
+    while(1);
+}
